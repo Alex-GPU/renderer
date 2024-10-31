@@ -84,4 +84,21 @@ public:
     }
 };
 
+class Triangle {
+public:
+    Vec3f ver0, ver1, ver2;
+
+    Triangle(const Vec3f&, const Vec3f&, const Vec3f&);
+};
+
+// a rectangle is defined by two triangles
+class Rectangle {
+public:
+    Triangle tri0, tri1;
+
+    Rectangle(const Triangle& t0=Triangle(Vec3f(), Vec3f(), Vec3f()), const Triangle& t1=Triangle(Vec3f(), Vec3f(), Vec3f()));
+    Rectangle(const Vec3f&, const Vec3f&, const Vec3f&, const Vec3f&);
+    //Rectangle(const Vec3f&, float l=1.f, float w=1.f);
+};
+
 #endif

@@ -146,3 +146,10 @@ float TwoTwoMatrix::operator[] (int i) const {
 Vec2f TwoTwoMatrix::pointMul(const Vec2f& v) const {
     return Vec2f(elements[0]*v.x + elements[1]*v.y, elements[2]*v.x + elements[3]*v.y);
 }
+
+Triangle::Triangle(const Vec3f& v0, const Vec3f& v1, const Vec3f& v2): ver0(v0), ver1(v1), ver2(v2){}
+
+Rectangle::Rectangle(const Triangle& t0, const Triangle& t1): tri0(t0), tri1(t1) {}
+
+Rectangle::Rectangle(const Vec3f& v0, const Vec3f& v1, const Vec3f& v2, const Vec3f& v3):
+    tri0(Triangle(v0, v1, v2)), tri1(Triangle(v2, v3, v0)) {}

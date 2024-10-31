@@ -33,21 +33,23 @@ Vec3<t> Vec3<t>::operator^ (const Vec3& v) const {
 }
 
 template <typename t>
-Vec3<t> Vec3<t>::operator* (float f) const {
-    return Vec3<t>(x*f, y*f, z*f);
+Vec3<float> Vec3<t>::operator* (const float& f) const {
+    return Vec3<float>(x*f, y*f, z*f);
 }
 
 template <typename t>
-t Vec3<t>::norm() const {
+float Vec3<t>::norm() const {
     return std::sqrt(x*x + y*y + z*z);
 }
 
 template <typename t>
 void Vec3<t>::normalize() {
-    t n = norm();
-    x /= n;
-    y /= n;
-    z /= n;
+    float n = norm();
+    if (n) {
+        x /= n;
+        y /= n;
+        z /= n;
+    }
 }
 
 template <typename t>
@@ -77,21 +79,25 @@ Vec3<t> Vec2<t>::operator^ (const Vec2& v) const {
 }
 
 template <typename t>
-Vec2<t> Vec2<t>::operator* (float f) const {
-    return Vec2<t>(x*f, y*f);
+Vec2<float> Vec2<t>::operator* (const float& f) const {
+    return Vec2<float>(x*f, y*f);
 }
 
 template <typename t>
-t Vec2<t>::norm() const {
+float Vec2<t>::norm() const {
     return std::sqrt(x*x + y*y);
 }
 
 template <typename t>
 void Vec2<t>::normalize() {
-    t n = norm();
-    x /= n;
-    y /= n;
+    float n = norm();
+    if (n) {
+        x /= n;
+        y /= n;
+    }
 }
+
+FourFourMatrix::FourFourMatrix() {}
 
 FourFourMatrix::FourFourMatrix(float elems[16]) {
     for (int i=0; i<16; i++) {
@@ -124,11 +130,17 @@ Vec3f FourFourMatrix::pointMul(const Vec3f& v) const {
                  elements[8]*v.x + elements[9]*v.y + elements[10]*v.z + elements[11]);
 }
 
+TwoTwoMatrix::TwoTwoMatrix() {}
+
 TwoTwoMatrix::TwoTwoMatrix(float elems[4]) {
     elements[0] = elems[0];
     elements[1] = elems[1];
     elements[2] = elems[2];
     elements[3] = elems[3];
+}
+
+float TwoTwoMatrix::operator[] (int i) const {
+    return elements[i];
 }
 
 Vec2f TwoTwoMatrix::pointMul(const Vec2f& v) const {

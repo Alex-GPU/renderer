@@ -1,6 +1,9 @@
 // test, thus no comment
 #include <iostream>
 #include <algorithm>
+#include <vector>
+#include <cstdio>
+#include <cstring>
 #include "geometry.h"
 #include "draw.h"
 #include "io.h"
@@ -8,9 +11,9 @@
 Vec3f v3f[] = {Vec3f(), Vec3f(1.1f, 1.1f, -3.f), Vec3f(1.1f, 2.2f, -3.f), Vec3f(2.2f, 2.2f, -3.f), Vec3f(2.2f, 1.1f, -3.f)};
 Vec2f v2f[] = {Vec2f(), Vec2f(1.1f,1.1f), Vec2f(0.5f), Vec2f(3.f, 4.f)};
 
-const int width{400}, height{400};
-Vec3i white(255, 255, 255);
-Vec3i image[(width+1)*(height+1)];
+const int width{1920}, height{1080};
+Vec3f white(255, 255, 255);
+std::vector<Vec3f> image((width+1)*(height+1));
 
 template<typename vecType0, typename vecType1, typename returnType>
 inline void compute(const vecType0& v0, const vecType1& v1,
@@ -83,7 +86,6 @@ void testWireTriangle() {
     int ymin = std::min({y0, y1, y2});
     int xmax = std::max({x0, x1, x2});
     int ymax = std::max({y0, y1, y2});
-    Vec3i image[width*height] = {0.f};
     Vec3i white(255, 255, 255);
     Vec2i v0(x0, y0), v1(x1, y1), v2(x2, y2);
     wireTriangle(v0, v1, v2, image, width, height);
@@ -108,6 +110,24 @@ void drawRectangle(const Rectangle& rec) {
     renderTriangle(t0.ver0, t0.ver1, t0.ver2, image, width, height);
     renderTriangle(t1.ver0, t1.ver1, t1.ver2, image, width, height);
     //saveToFile(image, width, height);
+}
+
+void testPrimitive() {
+    Vec3f recVertices[] = {Vec3f(0.f, 1.f, -2.f), Vec3f(2.f, 1.f, -4.f), Vec3f(0.f, 1.f, -6.f), Vec3f(-2.f, 1.f, -4.f),
+                            Vec3f(0.f, -1.f, -2.f), Vec3f(2.f, -1.f, -4.f), Vec3f(0.f, -1.f, -6.f), Vec3f(-2.f, -1.f, -4.f)};
+    
+    Rectangle cube[6];
+    cube[0] = Rectangle(recVertices[0], recVertices[1], recVertices[2], recVertices[3]);
+    cube[1] = Rectangle(recVertices[4], recVertices[5], recVertices[6], recVertices[7]);
+    for (int i=0; i<4; i++) {
+        cube[i+2] = Rectangle(recVertices[i], recVertices[i+4], recVertices[4 + (i+5) % 4], recVertices[i+1]); 
+    }
+    for (int i=0; i<6; i++){
+        std::cout << "\ndrawing rectangle " << i;
+        drawRectangle(cube[i]);
+    }
+
+    saveToFile(image, width, height);
 }
 
 int main(int argc, char** argv) {
@@ -137,18 +157,23 @@ int main(int argc, char** argv) {
     //saveToFile(image, width, height);
 
     //test primitive rectangle
-    Vec3f recVertices[] = {Vec3f(0.f, .5f, -3.f), Vec3f(1.f, .5f, -4.f), Vec3f(0.f, .5f, -5.f), Vec3f(-1.f, .5f, -4.f),
-                            Vec3f(0.f, -.5f, -3.f), Vec3f(1.f, -.5f, -4.f), Vec3f(0.f, -.5f, -5.f), Vec3f(-1.f, -.5f, -4.f)};
+    //testPrimitive();
+
+    //test model loading
+    /*char str[] = "v -10.24245 20.12849 0.33333";
+    const int tokenSize = 20;
+    char* coord = strtok(str+2, " ");
+    while (coord != NULL) {
+        std::cout << "\nstring is " << coord << " to float is " << std::atof(coord);
+        coord = strtok(NULL, " ");
+    }*/
+    const char* fileName = "models/low-poly-female.obj";
+    std::vector<Triangle> faces;
+    loadModel(fileName, faces);
     
-    Rectangle cube[6];
-    cube[0] = Rectangle(recVertices[0], recVertices[1], recVertices[2], recVertices[3]);
-    cube[1] = Rectangle(recVertices[4], recVertices[5], recVertices[6], recVertices[7]);
-    for (int i=0; i<4; i++) {
-        cube[i+2] = Rectangle(recVertices[i], recVertices[i+4], recVertices[4 + (i+5) % 4], recVertices[i+1]); 
-    }
-    for (int i=0; i<6; i++){
-        std::cout << "\ndrawing rectangle " << i;
-        drawRectangle(cube[i]);
+    for (int i=0; i<faces.size(); i++) {
+        Triangle tri = faces[i];
+        renderTriangle(tri.ver0, tri.ver1, tri.ver2, image, width, height);
     }
 
     saveToFile(image, width, height);

@@ -149,6 +149,10 @@ Vec2f TwoTwoMatrix::pointMul(const Vec2f& v) const {
 
 Triangle::Triangle(const Vec3f& v0, const Vec3f& v1, const Vec3f& v2): ver0(v0), ver1(v1), ver2(v2){}
 
+Vec3f& Triangle::operator[] (int i) {
+    return *(&ver0+i);
+}
+
 Rectangle::Rectangle(const Triangle& t0, const Triangle& t1): tri0(t0), tri1(t1) {}
 
 Rectangle::Rectangle(const Vec3f& v0, const Vec3f& v1, const Vec3f& v2, const Vec3f& v3):

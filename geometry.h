@@ -88,7 +88,11 @@ class Triangle {
 public:
     Vec3f ver0, ver1, ver2;
 
+    Vec3f& operator[] (int);
     Triangle(const Vec3f&, const Vec3f&, const Vec3f&);
+    friend std::ostream& operator<< (std::ostream& os, const Triangle& tri) {
+        return os << tri.ver0 << tri.ver1 << tri.ver2;
+    }
 };
 
 // a rectangle is defined by two triangles

@@ -13,8 +13,11 @@ template <typename t>
 t& Vec3<t>::operator[] (int i) {return *(&x + i);}
 
 template <typename t>
-Vec3<t> Vec3<t>::operator+ (const Vec3& v) const {
-    return Vec3<t>(x+v.x, y+v.y, z+v.z);
+Vec3<t>& Vec3<t>::operator+ (const Vec3& v) {
+    x += v.x;
+    y += v.y;
+    z += v.z;
+    return *this;
 }
 
 template <typename t>

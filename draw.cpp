@@ -30,12 +30,12 @@ void drawLine(const Vec2i& v0, const Vec2i& v1, std::vector<Vec3f>& image,
     int y = y0;
     for (int x=x0; x<=x1; x++) {
         if (steep) {
-            if ((x*width + y) < width*height && (x*width + y) >= 0) {
+            if (y >= 0 && y < width && x >=0 && x < height) {
                 image[x*width + y] = color;
             }
         }
         else {
-            if ((y*width + x) < width*height && (y*width + x) >= 0) {
+            if (x >= 0 && x < width && y >= 0 && y < height) {
                 image[y*width + x] = color;
             }
         }
@@ -65,6 +65,7 @@ Vec2f projection(const Vec3f& point, float zNear=-1.f) {
 void renderTriangle(const Vec3f& v0, const Vec3f& v1, const Vec3f& v2, std::vector<Vec3f>& image, 
                     int width, int height, const Vec3f& color) {
     //std::cout << "\nrender triangle " << v0 << v1 << v2;
+    if (v0.z > -1.f || v1.z > -1.f || v2.z > -1.f) {return;}
     Vec2f pV0 = projection(v0);
     Vec2f pV1 = projection(v1);
     Vec2f pV2 = projection(v2);

@@ -1,7 +1,16 @@
 // test, thus no comment
+#include <windows.h>
+#ifdef max
+#undef max
+#endif
+#ifdef min
+#undef min
+#endif
+
 #include <iostream>
 #include <algorithm>
 #include <vector>
+#include <cstdint>
 #include <cstdio>
 #include <cstring>
 #include "geometry.h"
@@ -12,8 +21,12 @@ Vec3f v3f[] = {Vec3f(), Vec3f(1.1f, 1.1f, -3.f), Vec3f(1.1f, 2.2f, -3.f), Vec3f(
 Vec2f v2f[] = {Vec2f(), Vec2f(1.1f,1.1f), Vec2f(0.5f), Vec2f(3.f, 4.f)};
 
 const int width{1920}, height{1080};
+const char* modelName = "models/low-poly-female.obj";
 Vec3f white(255, 255, 255);
-std::vector<Vec3f> image((width+1)*(height+1));
+std::vector<Vec3f> image((width)*(height));
+std::vector<Triangle> faces;
+std::vector<uint8_t> bMap;
+HBITMAP hBitmap;
 
 template<typename vecType0, typename vecType1, typename returnType>
 inline void compute(const vecType0& v0, const vecType1& v1,
@@ -29,7 +42,7 @@ void testConstructor() {
             << "\nv21 is " << v2f[1]
             << "\nv22 is " << v2f[2];
 }
-
+/*
 void testComputation() {
     for(int i=0; i<sizeof(v3f)/sizeof(v3f[0]) - 1; i++) {
         compute(v3f[i], v3f[i+1], &Vec3f::operator+, "+");
@@ -46,7 +59,7 @@ void testComputation() {
         compute(v2f[i], 0.5f, &Vec2f::operator*, "*");
         std::cout << "\n";
     }
-}
+}*/
 
 void testNorm() {
     for(int i=0; i<sizeof(v3f)/sizeof(v3f[0]); i++) {
@@ -105,7 +118,7 @@ void testSaveToFile() {
     saveToFile(image, width, height);
 }
 
-void drawRectangle(const Rectangle& rec) {
+/*void drawRectangle(const Rectangle& rec) {
     Triangle t0(rec.tri0), t1(rec.tri1);
     renderTriangle(t0.ver0, t0.ver1, t0.ver2, image, width, height);
     renderTriangle(t1.ver0, t1.ver1, t1.ver2, image, width, height);
@@ -128,8 +141,22 @@ void testPrimitive() {
     }
 
     saveToFile(image, width, height);
+}*/
+
+void testModelLoading() {
+    const char* fileName = "models/low-poly-female.obj";
+    std::vector<Triangle> faces;
+    loadModel(fileName, faces);
+    
+    for (int i=0; i<faces.size(); i++) {
+        Triangle tri = faces[i];
+        renderTriangle(tri.ver0, tri.ver1, tri.ver2, image, width, height);
+    }
+
+    saveToFile(image, width, height);
 }
 
+/*
 int main(int argc, char** argv) {
     //test vector constructor
     //testConstructor();
@@ -160,23 +187,243 @@ int main(int argc, char** argv) {
     //testPrimitive();
 
     //test model loading
-    /*char str[] = "v -10.24245 20.12849 0.33333";
-    const int tokenSize = 20;
-    char* coord = strtok(str+2, " ");
-    while (coord != NULL) {
-        std::cout << "\nstring is " << coord << " to float is " << std::atof(coord);
-        coord = strtok(NULL, " ");
-    }*/
     const char* fileName = "models/low-poly-female.obj";
     std::vector<Triangle> faces;
     loadModel(fileName, faces);
-    
-    for (int i=0; i<faces.size(); i++) {
-        Triangle tri = faces[i];
-        renderTriangle(tri.ver0, tri.ver1, tri.ver2, image, width, height);
+    while (true) {
+        for (int i=0; i<faces.size(); i++) {
+            Triangle tri = faces[i];
+            renderTriangle(tri.ver0, tri.ver1, tri.ver2, image, width, height);
+        }
+
+        std::vector<uint8_t> bMap;
+        //bMap.reserve(image.size()*3);
+        for (int i=0; i<image.size(); i++) {
+            bMap.push_back(static_cast<uint8_t>(image[i].x));
+            bMap.push_back(static_cast<uint8_t>(image[i].y));
+            bMap.push_back(static_cast<uint8_t>(image[i].z));
+        }
+        displayRGBBuffer(bMap, width, height);
+    Sleep(5000);
     }
 
-    saveToFile(image, width, height);
-
     return 0;    
+}*/
+
+void createBitmapFromBuffer(HDC hdc, int width, int height) {
+    BITMAPINFO bmi = {};
+
+    bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+    bmi.bmiHeader.biWidth = width;
+    bmi.bmiHeader.biHeight = -height;
+    bmi.bmiHeader.biPlanes = 1;
+    bmi.bmiHeader.biBitCount = 24;
+    bmi.bmiHeader.biCompression = BI_RGB;
+
+    void *bits;
+    hBitmap = CreateDIBSection(hdc, &bmi, DIB_RGB_COLORS, &bits, NULL, 0);
+
+    memcpy(bits, bMap.data(), bMap.size());
+}
+
+LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
+    switch (msg) {
+        case WM_PAINT: {
+            PAINTSTRUCT ps;
+            HDC hdc = BeginPaint(hwnd, &ps);
+            HDC hdcMem = CreateCompatibleDC(hdc);
+
+            DeleteObject(hBitmap);
+            createBitmapFromBuffer(hdcMem, width, height);
+            HBITMAP preBitmap = (HBITMAP)SelectObject(hdcMem, hBitmap);
+
+            BitBlt(hdc, 0, 0, width, height, hdcMem, 0, 0, SRCCOPY);
+            SelectObject(hdcMem, preBitmap);
+            DeleteDC(hdcMem);
+            EndPaint(hwnd, &ps);
+            break;
+        }
+        case WM_DESTROY: {
+            DeleteObject(hBitmap);
+            PostQuitMessage(0);
+            break;
+        }
+        case WM_TIMER: {
+            InvalidateRect(hwnd, NULL, TRUE);
+            break;
+        }
+        case WM_KEYDOWN: {
+            switch (wParam) {
+                case VK_UP: {
+                    Vec3f step{0.f, -1.f, 0.f};
+                    std::cout << "\nUp pressed\n";
+                    memset(&image[0], 0, image.size()*sizeof(Vec3f));
+                    for (int i=0; i<faces.size(); i++) {
+                        renderTriangle(faces[i].ver0+step, faces[i].ver1+step, faces[i].ver2+step, image, width, height);
+                    }
+
+                //bMap.reserve(image.size()*3);
+                    bMap.clear();
+                    for (int i=0; i<image.size(); i++) {
+                        bMap.push_back(static_cast<uint8_t>(image[i].x));
+                        bMap.push_back(static_cast<uint8_t>(image[i].y));
+                        bMap.push_back(static_cast<uint8_t>(image[i].z));
+                    }
+                    
+                    InvalidateRect(hwnd, NULL, TRUE);
+                    UpdateWindow(hwnd);
+                    break;
+                }
+                case VK_DOWN: {
+                    Vec3f step{0.f, 1.f, 0.f};
+                    std::cout << "\nDown pressed\n";
+                    memset(&image[0], 0, image.size()*sizeof(Vec3f));
+                    for (int i=0; i<faces.size(); i++) {
+                        renderTriangle(faces[i].ver0+step, faces[i].ver1+step, faces[i].ver2+step, image, width, height);
+                    }
+
+                //bMap.reserve(image.size()*3);
+                    bMap.clear();
+                    for (int i=0; i<image.size(); i++) {
+                        bMap.push_back(static_cast<uint8_t>(image[i].x));
+                        bMap.push_back(static_cast<uint8_t>(image[i].y));
+                        bMap.push_back(static_cast<uint8_t>(image[i].z));
+                    }
+                    
+                    InvalidateRect(hwnd, NULL, TRUE);
+                    UpdateWindow(hwnd);
+                    break;
+                }
+                case 0x57: {
+                    Vec3f step{0.f, 0.f, 1.f};
+                    std::cout << "\nW pressed\n";
+                    memset(&image[0], 0, image.size()*sizeof(Vec3f));
+                    for (int i=0; i<faces.size(); i++) {
+                        renderTriangle(faces[i].ver0+step, faces[i].ver1+step, faces[i].ver2+step, image, width, height);
+                    }
+
+                //bMap.reserve(image.size()*3);
+                    bMap.clear();
+                    for (int i=0; i<image.size(); i++) {
+                        bMap.push_back(static_cast<uint8_t>(image[i].x));
+                        bMap.push_back(static_cast<uint8_t>(image[i].y));
+                        bMap.push_back(static_cast<uint8_t>(image[i].z));
+                    }
+                    
+                    InvalidateRect(hwnd, NULL, TRUE);
+                    UpdateWindow(hwnd);
+                    break;
+                }
+                case 0x53: {
+                    Vec3f step{0.f, 0.f, -1.f};
+                    std::cout << "\nS pressed\n";
+                    memset(&image[0], 0, image.size()*sizeof(Vec3f));
+                    for (int i=0; i<faces.size(); i++) {
+                        renderTriangle(faces[i].ver0+step, faces[i].ver1+step, faces[i].ver2+step, image, width, height);
+                    }
+
+                //bMap.reserve(image.size()*3);
+                    bMap.clear();
+                    for (int i=0; i<image.size(); i++) {
+                        bMap.push_back(static_cast<uint8_t>(image[i].x));
+                        bMap.push_back(static_cast<uint8_t>(image[i].y));
+                        bMap.push_back(static_cast<uint8_t>(image[i].z));
+                    }
+                    
+                    InvalidateRect(hwnd, NULL, TRUE);
+                    UpdateWindow(hwnd);
+                    break;
+                }
+                case 0x41: {
+                    Vec3f step{1.f, 0.f, -0.f};
+                    std::cout << "\nA pressed\n";
+                    memset(&image[0], 0, image.size()*sizeof(Vec3f));
+                    for (int i=0; i<faces.size(); i++) {
+                        renderTriangle(faces[i].ver0+step, faces[i].ver1+step, faces[i].ver2+step, image, width, height);
+                    }
+
+                //bMap.reserve(image.size()*3);
+                    bMap.clear();
+                    for (int i=0; i<image.size(); i++) {
+                        bMap.push_back(static_cast<uint8_t>(image[i].x));
+                        bMap.push_back(static_cast<uint8_t>(image[i].y));
+                        bMap.push_back(static_cast<uint8_t>(image[i].z));
+                    }
+                    
+                    InvalidateRect(hwnd, NULL, TRUE);
+                    UpdateWindow(hwnd);
+                    break;
+                }
+                case 0x44: {
+                    Vec3f step{-1.f, 0.f, 0.f};
+                    std::cout << "\nD pressed\n";
+                    memset(&image[0], 0, image.size()*sizeof(Vec3f));
+                    for (int i=0; i<faces.size(); i++) {
+                        renderTriangle(faces[i].ver0+step, faces[i].ver1+step, faces[i].ver2+step, image, width, height);
+                    }
+
+                //bMap.reserve(image.size()*3);
+                    bMap.clear();
+                    for (int i=0; i<image.size(); i++) {
+                        bMap.push_back(static_cast<uint8_t>(image[i].x));
+                        bMap.push_back(static_cast<uint8_t>(image[i].y));
+                        bMap.push_back(static_cast<uint8_t>(image[i].z));
+                    }
+                    
+                    InvalidateRect(hwnd, NULL, TRUE);
+                    UpdateWindow(hwnd);
+                    break;
+                }
+            }
+            break;
+        }
+        default: {
+            return DefWindowProc(hwnd, msg, wParam, lParam);
+        }
+    }
+
+    return 0;
+}
+
+int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE hInstPrev, PSTR cmdline, int cmdshow) {
+    WNDCLASS wc = {};
+    wc.lpfnWndProc = WindowProc;
+    wc.hInstance = hInstance;
+    wc.lpszClassName = "renderer";
+
+    RegisterClass(&wc);
+
+    HWND hwnd = CreateWindowEx(0, "renderer", "renderer window", WS_OVERLAPPEDWINDOW,
+                               0, 0, width, height, NULL, NULL, hInstance, NULL);
+    ShowWindow(hwnd, cmdshow);
+
+    // load model
+    loadModel(modelName, faces);
+    for (int i=0; i<faces.size(); i++) {
+            Triangle tri = faces[i];
+            renderTriangle(tri.ver0, tri.ver1, tri.ver2, image, width, height);
+    }
+
+    //bMap.reserve(image.size()*3);
+    for (int i=0; i<image.size(); i++) {
+        bMap.push_back(static_cast<uint8_t>(image[i].x));
+        bMap.push_back(static_cast<uint8_t>(image[i].y));
+        bMap.push_back(static_cast<uint8_t>(image[i].z));
+    }
+
+    // Create the bitmap once at the beginning
+    HDC hdc = GetDC(hwnd);
+    createBitmapFromBuffer(hdc, width, height);
+    ReleaseDC(hwnd, hdc);
+
+    //SetTimer(hwnd, 0, 1000, NULL);
+
+    // Main message loop
+    MSG msg = {};
+    while (GetMessage(&msg, NULL, 0, 0)) {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+    }
+
+    return 0;
 }

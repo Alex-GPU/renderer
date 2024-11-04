@@ -10,7 +10,7 @@ public:
 
     Vec3(t _x=0, t _y=0, t _z=0);
     t& operator[] (int);
-    Vec3 operator+ (const Vec3&) const;
+    Vec3& operator+ (const Vec3&);
     Vec3 operator- (const Vec3&) const;
     t operator* (const Vec3&) const;
     Vec3 operator^ (const Vec3&) const;

@@ -1,10 +1,7 @@
 #include <cmath>
 #include "geometry.h"
 
-template class Vec3<float>;
-template class Vec3<int>;
-template class Vec2<float>;
-template class Vec2<int>;
+
 
 template <typename t>
 Vec3<t>::Vec3(t _x, t _y, t _z): x((t)_x), y((t)_y), z((t)_z) {}
@@ -99,6 +96,11 @@ void Vec2<t>::normalize() {
         y /= n;
     }
 }
+
+template class Vec3<float>;
+template class Vec3<int>;
+template class Vec2<float>;
+template class Vec2<int>;
 
 FourFourMatrix::FourFourMatrix() {}
 

@@ -1,1 +1,1 @@
-# a renderer implemented without any graphics API
+# a renderer implemented without any gpu API

@@ -1,4 +1,3 @@
-// test, thus no comment
 #include <windows.h>
 #ifdef max
 #undef max
@@ -27,7 +26,7 @@ std::vector<Vec3f> image((width)*(height));
 std::vector<Triangle> faces;
 std::vector<uint8_t> bMap;
 HBITMAP hBitmap;
-
+/*
 template<typename vecType0, typename vecType1, typename returnType>
 inline void compute(const vecType0& v0, const vecType1& v1,
                     returnType (vecType0::*opr)(const vecType1&) const, const char* oprSym) {
@@ -59,7 +58,7 @@ void testComputation() {
         compute(v2f[i], 0.5f, &Vec2f::operator*, "*");
         std::cout << "\n";
     }
-}*/
+}
 
 void testNorm() {
     for(int i=0; i<sizeof(v3f)/sizeof(v3f[0]); i++) {
@@ -141,7 +140,7 @@ void testPrimitive() {
     }
 
     saveToFile(image, width, height);
-}*/
+}
 
 void testModelLoading() {
     const char* fileName = "models/low-poly-female.obj";
@@ -156,7 +155,7 @@ void testModelLoading() {
     saveToFile(image, width, height);
 }
 
-/*
+
 int main(int argc, char** argv) {
     //test vector constructor
     //testConstructor();
@@ -203,13 +202,13 @@ int main(int argc, char** argv) {
             bMap.push_back(static_cast<uint8_t>(image[i].y));
             bMap.push_back(static_cast<uint8_t>(image[i].z));
         }
-        displayRGBBuffer(bMap, width, height);
+        //displayRGBBuffer(bMap, width, height);
     Sleep(5000);
     }
 
     return 0;    
-}*/
-
+}
+*/
 void createBitmapFromBuffer(HDC hdc, int width, int height) {
     BITMAPINFO bmi = {};
 

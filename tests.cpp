@@ -43,6 +43,24 @@ void createBitmapFromBuffer(HDC hdc, int width, int height) {
     memcpy(bits, bMap.data(), bMap.size());
 }
 
+void updateFrame(HWND hwnd, Vec3f step) {
+    memset(&image[0], 0, image.size()*sizeof(Vec3f));
+    for (int i=0; i<faces.size(); i++) {
+        renderTriangle(faces[i].ver0+step, faces[i].ver1+step, faces[i].ver2+step, image, width, height);
+    }
+
+    //bMap.reserve(image.size()*3);
+    bMap.clear();
+    for (int i=0; i<image.size(); i++) {
+        bMap.push_back(static_cast<uint8_t>(image[i].x));
+        bMap.push_back(static_cast<uint8_t>(image[i].y));
+        bMap.push_back(static_cast<uint8_t>(image[i].z));
+    }
+    
+    InvalidateRect(hwnd, NULL, TRUE);
+    UpdateWindow(hwnd);
+}
+
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
     switch (msg) {
         case WM_PAINT: {
@@ -73,122 +91,38 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) {
             switch (wParam) {
                 case VK_UP: {
                     Vec3f step{0.f, -1.f, 0.f};
-                    std::cout << "\nUp pressed\n";
-                    memset(&image[0], 0, image.size()*sizeof(Vec3f));
-                    for (int i=0; i<faces.size(); i++) {
-                        renderTriangle(faces[i].ver0+step, faces[i].ver1+step, faces[i].ver2+step, image, width, height);
-                    }
-
-                //bMap.reserve(image.size()*3);
-                    bMap.clear();
-                    for (int i=0; i<image.size(); i++) {
-                        bMap.push_back(static_cast<uint8_t>(image[i].x));
-                        bMap.push_back(static_cast<uint8_t>(image[i].y));
-                        bMap.push_back(static_cast<uint8_t>(image[i].z));
-                    }
-                    
-                    InvalidateRect(hwnd, NULL, TRUE);
-                    UpdateWindow(hwnd);
+                    //std::cout << "\nUp pressed\n";
+                    updateFrame(hwnd, step);
                     break;
                 }
                 case VK_DOWN: {
                     Vec3f step{0.f, 1.f, 0.f};
-                    std::cout << "\nDown pressed\n";
-                    memset(&image[0], 0, image.size()*sizeof(Vec3f));
-                    for (int i=0; i<faces.size(); i++) {
-                        renderTriangle(faces[i].ver0+step, faces[i].ver1+step, faces[i].ver2+step, image, width, height);
-                    }
-
-                //bMap.reserve(image.size()*3);
-                    bMap.clear();
-                    for (int i=0; i<image.size(); i++) {
-                        bMap.push_back(static_cast<uint8_t>(image[i].x));
-                        bMap.push_back(static_cast<uint8_t>(image[i].y));
-                        bMap.push_back(static_cast<uint8_t>(image[i].z));
-                    }
-                    
-                    InvalidateRect(hwnd, NULL, TRUE);
-                    UpdateWindow(hwnd);
+                    //std::cout << "\nDown pressed\n";
+                    updateFrame(hwnd, step);
                     break;
                 }
                 case 0x57: {
                     Vec3f step{0.f, 0.f, 1.f};
-                    std::cout << "\nW pressed\n";
-                    memset(&image[0], 0, image.size()*sizeof(Vec3f));
-                    for (int i=0; i<faces.size(); i++) {
-                        renderTriangle(faces[i].ver0+step, faces[i].ver1+step, faces[i].ver2+step, image, width, height);
-                    }
-
-                //bMap.reserve(image.size()*3);
-                    bMap.clear();
-                    for (int i=0; i<image.size(); i++) {
-                        bMap.push_back(static_cast<uint8_t>(image[i].x));
-                        bMap.push_back(static_cast<uint8_t>(image[i].y));
-                        bMap.push_back(static_cast<uint8_t>(image[i].z));
-                    }
-                    
-                    InvalidateRect(hwnd, NULL, TRUE);
-                    UpdateWindow(hwnd);
+                    //std::cout << "\nW pressed\n";
+                    updateFrame(hwnd, step);
                     break;
                 }
                 case 0x53: {
                     Vec3f step{0.f, 0.f, -1.f};
-                    std::cout << "\nS pressed\n";
-                    memset(&image[0], 0, image.size()*sizeof(Vec3f));
-                    for (int i=0; i<faces.size(); i++) {
-                        renderTriangle(faces[i].ver0+step, faces[i].ver1+step, faces[i].ver2+step, image, width, height);
-                    }
-
-                //bMap.reserve(image.size()*3);
-                    bMap.clear();
-                    for (int i=0; i<image.size(); i++) {
-                        bMap.push_back(static_cast<uint8_t>(image[i].x));
-                        bMap.push_back(static_cast<uint8_t>(image[i].y));
-                        bMap.push_back(static_cast<uint8_t>(image[i].z));
-                    }
-                    
-                    InvalidateRect(hwnd, NULL, TRUE);
-                    UpdateWindow(hwnd);
+                    //std::cout << "\nS pressed\n";
+                    updateFrame(hwnd, step);
                     break;
                 }
                 case 0x41: {
                     Vec3f step{1.f, 0.f, -0.f};
-                    std::cout << "\nA pressed\n";
-                    memset(&image[0], 0, image.size()*sizeof(Vec3f));
-                    for (int i=0; i<faces.size(); i++) {
-                        renderTriangle(faces[i].ver0+step, faces[i].ver1+step, faces[i].ver2+step, image, width, height);
-                    }
-
-                //bMap.reserve(image.size()*3);
-                    bMap.clear();
-                    for (int i=0; i<image.size(); i++) {
-                        bMap.push_back(static_cast<uint8_t>(image[i].x));
-                        bMap.push_back(static_cast<uint8_t>(image[i].y));
-                        bMap.push_back(static_cast<uint8_t>(image[i].z));
-                    }
-                    
-                    InvalidateRect(hwnd, NULL, TRUE);
-                    UpdateWindow(hwnd);
+                    //std::cout << "\nA pressed\n";
+                    updateFrame(hwnd, step);
                     break;
                 }
                 case 0x44: {
                     Vec3f step{-1.f, 0.f, 0.f};
-                    std::cout << "\nD pressed\n";
-                    memset(&image[0], 0, image.size()*sizeof(Vec3f));
-                    for (int i=0; i<faces.size(); i++) {
-                        renderTriangle(faces[i].ver0+step, faces[i].ver1+step, faces[i].ver2+step, image, width, height);
-                    }
-
-                //bMap.reserve(image.size()*3);
-                    bMap.clear();
-                    for (int i=0; i<image.size(); i++) {
-                        bMap.push_back(static_cast<uint8_t>(image[i].x));
-                        bMap.push_back(static_cast<uint8_t>(image[i].y));
-                        bMap.push_back(static_cast<uint8_t>(image[i].z));
-                    }
-                    
-                    InvalidateRect(hwnd, NULL, TRUE);
-                    UpdateWindow(hwnd);
+                    //std::cout << "\nD pressed\n";
+                    updateFrame(hwnd, step);
                     break;
                 }
             }
